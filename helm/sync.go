@@ -20,7 +20,7 @@ import (
 func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 	for _, repo := range helmChartMirrorConfig.Repositories {
 		for _, chart := range repo.Charts {
-			helmChart, err := loadHelmChart(repo, chart, helmChartMirrorConfig.TmpDir)
+			helmChart, chartFile, err := loadHelmChart(repo, chart, helmChartMirrorConfig.TmpDir)
 			if err != nil {
 				log.Printf("ERROR: unable to load Helm chart '%s/%s', skipping!\n", repo.Name, chart.Name)
 				continue
@@ -42,6 +42,8 @@ func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 			for _, image := range allChartImages {
 				SyncImage(image, helmChartMirrorConfig)
 			}
+
+			pushChartFileToRegistry(chartFile, repo.Name, chart.Name, chart.Version, helmChartMirrorConfig)
 		}
 	}
 }

@@ -30,8 +30,6 @@ type Config struct {
 	OverridePlatform      string       `yaml:"overridePlatform"`
 	DestinationRegistry   string
 	DestinationRepository string
-	DockerUsername        string
-	DockerPassword        string
 	TmpDir                string
 }
 
