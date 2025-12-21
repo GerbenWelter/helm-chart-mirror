@@ -9,7 +9,8 @@ import (
 
 func main() {
 	log.Println("INFO: starting helm-chart-mirror")
-	config := config.LoadConfig()
+	helmChartMirrorConfig := config.LoadConfig()
+	config.LoadOCICredentials()
 
-	helm.MirrorHelmCharts(config)
+	helm.MirrorHelmCharts(helmChartMirrorConfig)
 }

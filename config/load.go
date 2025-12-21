@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"gopkg.in/yaml.v3"
+
+	"oras.land/oras-go/v2/registry/remote/credentials"
 )
 
 type Chart struct {
@@ -32,23 +34,15 @@ type Config struct {
 	TmpDir                string
 }
 
+var OCICredentials *credentials.DynamicStore
+
 func LoadConfig() Config {
-	dockerUsername, exists := os.LookupEnv("DOCKER_IO_USERNAME")
-	if !exists {
-		log.Println("WARNING: docker.io username is not configured. This may result in HTTP 429 (rate limiting) errors.")
-	}
-
-	dockerPassword, exists := os.LookupEnv("DOCKER_IO_PASSWORD")
-	if !exists {
-		log.Println("WARNING: docker.io password is not configured. This may result in HTTP 429 (rate limiting) errors.")
-	}
-
-	registry, exists := os.LookupEnv("HELM_CHART_MIRROR_REGISTRY")
+	mirrorRegistry, exists := os.LookupEnv("HELM_CHART_MIRROR_REGISTRY")
 	if !exists {
 		log.Fatal("ERROR: helm-chart-mirror password is not specified!")
 	}
 
-	registryBaseRepository, exists := os.LookupEnv("HELM_CHART_MIRROR_BASE_REPO")
+	mirrorRepository, exists := os.LookupEnv("HELM_CHART_MIRROR_BASE_REPO")
 	if !exists {
 		log.Fatal("ERROR: helm-chart-mirror base repository is not specified!")
 	}
@@ -60,10 +54,8 @@ func LoadConfig() Config {
 	}
 
 	config := Config{
-		DestinationRegistry:   registry,
-		DestinationRepository: registryBaseRepository,
-		DockerUsername:        dockerUsername,
-		DockerPassword:        dockerPassword,
+		DestinationRegistry:   mirrorRegistry,
+		DestinationRepository: mirrorRepository,
 		TmpDir:                tmpDir,
 	}
 
@@ -79,10 +71,25 @@ func LoadConfig() Config {
 		log.Fatalf("ERROR: unable to read config file '%s'\n", configFilePath)
 	}
 
-	// repositoryConfig := &RepositoryConfig{}
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	if err = decoder.Decode(&config); err != nil {
 		log.Fatalf("ERROR: unable to parse config (%s)", err)
 	}
 	return config
+}
+
+func LoadOCICredentials() {
+	credentialsFilePath := "/etc/helm-chart-mirror/auth.json"
+	envValue, exists := os.LookupEnv("HELM_CHART_MIRROR_OCI_CREDENTIALS")
+	if exists {
+		credentialsFilePath = envValue
+	}
+	log.Printf("INFO: loading registry credentials from '%s'\n", credentialsFilePath)
+	storeOptions := credentials.StoreOptions{}
+	creds, err := credentials.NewStore(credentialsFilePath, storeOptions)
+	if err != nil {
+		log.Fatalf("ERROR: unable to load OCI credentials from file '%s': %v", credentialsFilePath, err)
+	}
+
+	OCICredentials = creds
 }
