@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"runtime"
 	"strings"
 
 	"helm-chart-mirror/config"
@@ -123,12 +124,22 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 
 	_, err = repo.Resolve(context.Background(), reference)
 	if err != nil {
-		// force linux/amd64 to facilitate testing on other platforms
+		// Use current platform unless overridden
 		copyOptions := oras.DefaultCopyOptions
-		copyOptions.WithTargetPlatform(&ocispec.Platform{
-			OS:           "linux",
-			Architecture: "amd64",
-		})
+		if helmChartMirrorConfig.OverridePlatform != "" {
+			platform := strings.Split(helmChartMirrorConfig.OverridePlatform, "/")
+			platformOS := platform[0]
+			platformArch := platform[1]
+			copyOptions.WithTargetPlatform(&ocispec.Platform{
+				OS:           platformOS,
+				Architecture: platformArch,
+			})
+		} else {
+			copyOptions.WithTargetPlatform(&ocispec.Platform{
+				OS:           runtime.GOOS,
+				Architecture: runtime.GOARCH,
+			})
+		}
 
 		_, err = oras.Copy(context.Background(), source, tagDigest, dest, tag, copyOptions)
 		if err != nil {

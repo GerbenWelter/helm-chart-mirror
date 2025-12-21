@@ -27,6 +27,7 @@ type Repository struct {
 type Config struct {
 	KubernetesVersion     string       `yaml:"kubernetesVersion"`
 	Repositories          []Repository `yaml:"repositories"`
+	OverridePlatform      string       `yaml:"overridePlatform"`
 	DestinationRegistry   string
 	DestinationRepository string
 	DockerUsername        string
