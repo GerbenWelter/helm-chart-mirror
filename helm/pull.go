@@ -9,7 +9,6 @@ import (
 )
 
 func pullHelmChartFile(repository, chartName, chartVersion, tmpDir string) (string, error) {
-	fmt.Printf("%s | %s | %s | %s", repository, chartName, chartVersion, tmpDir)
 	var chartFile string
 	actionConfig, err := helmClient()
 	if err != nil {

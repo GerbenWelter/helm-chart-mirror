@@ -23,9 +23,8 @@ type Repository struct {
 }
 
 type Config struct {
+	KubernetesVersion     string       `yaml:"kubernetesVersion"`
 	Repositories          []Repository `yaml:"repositories"`
-	Username              string
-	Password              string
 	DestinationRegistry   string
 	DestinationRepository string
 	DockerUsername        string
@@ -34,16 +33,6 @@ type Config struct {
 }
 
 func LoadConfig() Config {
-	helmChartmirrorUsername, exists := os.LookupEnv("HELM_CHART_MIRROR_USERNAME")
-	if !exists {
-		log.Fatal("ERROR: helm-chart-mirror username is not specified!")
-	}
-
-	helmChartmirrorPassword, exists := os.LookupEnv("HELM_CHART_MIRROR_PASSWORD")
-	if !exists {
-		log.Fatal("ERROR: helm-chart-mirror password is not specified!")
-	}
-
 	dockerUsername, exists := os.LookupEnv("DOCKER_IO_USERNAME")
 	if !exists {
 		log.Println("WARNING: docker.io username is not configured. This may result in HTTP 429 (rate limiting) errors.")
@@ -71,8 +60,6 @@ func LoadConfig() Config {
 	}
 
 	config := Config{
-		Username:              helmChartmirrorUsername,
-		Password:              helmChartmirrorPassword,
 		DestinationRegistry:   registry,
 		DestinationRepository: registryBaseRepository,
 		DockerUsername:        dockerUsername,
