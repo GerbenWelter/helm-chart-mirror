@@ -58,7 +58,7 @@ repositories:
 
 Template configurations can be specified multiple times to get different outputs. This is useful when charts can be used in different but conflicting ways or to activate additional container images. Helm-chart-mirror will mirror the combination of used container images. Contents is the same as as if the configuration was supplied in a `values.yaml` file.
 
-Images and helm charts are mirrored taking the original repistry and repository in account for clarity of origin. E.g. the 'openshift-routes' helm chart uses the following image:
+Images and helm charts are mirrored taking the original registry and repository in account for clarity of origin. E.g. the 'openshift-routes' helm chart uses the following image:
 
 'ghcr.io/cert-manager/cert-manager-openshift-routes:v0.8.4'
 
@@ -68,3 +68,7 @@ image: `myregistry.example.com:5043/mirror/ghcr.io/cert-manager/cert-manager-ope
 chart: `myregistry.example.com:5043/mirror/charts/cert-manager/openshift-routes:0.8.4`
 
 Charts are mirrored to their own 'charts' subdir to prevent name conflicts with a image used in the chart.
+
+## Authentication
+
+To authenticate to the source and/or destination registries a standard `auth.json` must be provided. By default it will try to load it from `/etc/helm-chart-mirror/auth.json`. An alternative file can be specified using the `HELM_CHART_MIRROR_OCI_CREDENTIALS` environment variable.
