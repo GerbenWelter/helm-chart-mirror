@@ -2,25 +2,20 @@
 
 ## Preface
 
-This is the repository for `helm-chart-mirror`, a tool for mirroring Helm charts and their container images to another OCI-compliant registry. This is useful for environments that are air-gapped and/or don't want to depend on the availability of external resources.
+This is the repository for `helm-chart-mirror`, a tool for mirroring Helm charts and their container images to an OCI-compliant registry. This is useful for environments that are air-gapped and/or don't want to depend on the availability of external resources.
 
 ## Features
 
 Helm-chart-mirror has the following features:
 
-- Can pull from classic Helm or OCI-compliant registries.
+- Can pull charts from classic Helm or OCI-compliant registries.
 - Mirror container images used by Helm chart.
-- Supports multiple sets values for configurations that might otherwise conflict.
-- Supports authentication to destination registry.
-
-## Future features
-
-- Source registry authentication (are there any public?).
-- Multi-arch container image syncing if possible. Currently supports mirroring a single architecture only.
+- Supports multiple sets of values for configurations that might otherwise conflict or additional container images.
+- Supports authentication to OCI-compliant registries.
 
 ## Usage
 
-Helm-chart-mirror when compiled to a single binary can be used in scripting or in a cronjob. It's configured through a `config.yaml`. The default location is `/etc/helm-chart-mirror/config.yaml` but it can be overridden with the `HELM_CHART_MIRROR_CONFIG` environment variable. Helm-chart-mirror can be configured as following:
+When compiled to a single binary `helm-chart-mirror` can be used in scripting or in a cronjob. It's configured through a `config.yaml`. The default location is `/etc/helm-chart-mirror/config.yaml` but it can be overridden with the `HELM_CHART_MIRROR_CONFIG` environment variable. Helm-chart-mirror can be configured as following:
 
 ```yaml
 destinationRegistry: myregistry.example.com:5043 # if no port is specified it will default to 443
@@ -58,16 +53,16 @@ repositories:
 
 Template configurations can be specified multiple times to get different outputs. This is useful when charts can be used in different but conflicting ways or to activate additional container images. Helm-chart-mirror will mirror the combination of used container images. Contents is the same as as if the configuration was supplied in a `values.yaml` file.
 
-Images and helm charts are mirrored taking the original registry and repository in account for clarity of origin. E.g. the 'openshift-routes' helm chart uses the following image:
+Contaner images and Helm charts are mirrored taking the original registry and repository in account for clarity of origin. E.g. the 'openshift-routes' helm chart uses the following image:
 
 'ghcr.io/cert-manager/cert-manager-openshift-routes:v0.8.4'
 
-Then the helm chart and image will be synced as following:
+Then the Helm chart and container image will be synced as following:
 
 image: `myregistry.example.com:5043/mirror/ghcr.io/cert-manager/cert-manager-openshift-routes:v0.8.4`
 chart: `myregistry.example.com:5043/mirror/charts/cert-manager/openshift-routes:0.8.4`
 
-Charts are mirrored to their own 'charts' subdir to prevent name conflicts with a image used in the chart.
+Charts are mirrored to their own 'charts' subdir to prevent name conflicts with a container image used in the chart.
 
 ## Authentication
 
