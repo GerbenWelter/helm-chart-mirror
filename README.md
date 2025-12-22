@@ -67,3 +67,7 @@ Charts are mirrored to their own 'charts' subdir to prevent name conflicts with 
 ## Authentication
 
 To authenticate to the source and/or destination registries a standard `auth.json` must be provided. By default it will try to load it from `/etc/helm-chart-mirror/auth.json`. An alternative file can be specified using the `HELM_CHART_MIRROR_OCI_CREDENTIALS` environment variable.
+
+## Supported platforms
+
+Helm-chart-mirror is tested on Linux and macOS.
