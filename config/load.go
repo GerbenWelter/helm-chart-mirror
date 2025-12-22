@@ -14,8 +14,6 @@ type Chart struct {
 	Name                   string           `yaml:"name"`
 	Version                string           `yaml:"version"`
 	TemplateConfigurations []map[string]any `yaml:"templateConfigurations"`
-	DestinationRegistry    string           `yaml:"destinationRegistry"`
-	DestinationRepository  string           `yaml:"destinationRepository"`
 }
 
 type Repository struct {
@@ -28,38 +26,22 @@ type Config struct {
 	KubernetesVersion     string       `yaml:"kubernetesVersion"`
 	Repositories          []Repository `yaml:"repositories"`
 	OverridePlatform      string       `yaml:"overridePlatform"`
-	DestinationRegistry   string
-	DestinationRepository string
-	TmpDir                string
+	DestinationRegistry   string       `yaml:"destinationRegistry"`
+	DestinationRepository string       `yaml:"destinationRepository"`
+	TmpDir                string       `yaml:"tmpDir"`
 }
 
 var OCICredentials *credentials.DynamicStore
 
 func LoadConfig() Config {
-	mirrorRegistry, exists := os.LookupEnv("HELM_CHART_MIRROR_REGISTRY")
-	if !exists {
-		log.Fatal("ERROR: helm-chart-mirror password is not specified!")
-	}
-
-	mirrorRepository, exists := os.LookupEnv("HELM_CHART_MIRROR_BASE_REPO")
-	if !exists {
-		log.Fatal("ERROR: helm-chart-mirror base repository is not specified!")
-	}
-
-	tmpDir := "/tmp"
-	envValue, exists := os.LookupEnv("HELM_CHART_MIRROR_TMPDIR")
-	if exists {
-		tmpDir = envValue
-	}
-
 	config := Config{
-		DestinationRegistry:   mirrorRegistry,
-		DestinationRepository: mirrorRepository,
-		TmpDir:                tmpDir,
+		DestinationRegistry:   "",
+		DestinationRepository: "",
+		TmpDir:                "/tmp",
 	}
 
 	configFilePath := "/etc/helm-chart-mirror/config.yaml"
-	envValue, exists = os.LookupEnv("HELM_CHART_MIRROR_CONFIG")
+	envValue, exists := os.LookupEnv("HELM_CHART_MIRROR_CONFIG")
 	if exists {
 		configFilePath = envValue
 	}
@@ -74,6 +56,11 @@ func LoadConfig() Config {
 	if err = decoder.Decode(&config); err != nil {
 		log.Fatalf("ERROR: unable to parse config (%s)", err)
 	}
+
+	if config.DestinationRegistry == "" || config.DestinationRepository == "" {
+		log.Fatalln("ERROR: mirror registry and mirror repository need to be configured!")
+	}
+
 	return config
 }
 
