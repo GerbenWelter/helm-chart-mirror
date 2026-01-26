@@ -16,6 +16,7 @@ archives:
     files:
       - LICENSE
       - README.md
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 
 changelog:
   use: github
