@@ -1,7 +1,9 @@
 package helm
 
 import (
+	"helm-chart-mirror/config"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/mikefarah/yq/v4/pkg/yqlib"
@@ -37,7 +39,42 @@ func dedupImages(chartImages []string) []string {
 	return allChartImages
 }
 
-func collectAllImages(outputManifest string) []string {
+func getQueryPredicate(imageResources []string) []string {
+	queryPredicate := make([]string, len(imageResources))
+	for i, s := range imageResources {
+		queryPredicate[i] = `.kind == "` + s + `"`
+	}
+
+	return queryPredicate
+}
+
+func collectAllImages(outputManifest string, helmChartMirrorConfig config.Config, repoConfig config.Repository, chartConfig config.Chart) []string {
+	// list of default resources that will be parsed for images
+	imageResources := []string{
+		"CronJob",
+		"DaemonSet",
+		"Deployment",
+		"DeploymentConfig",
+		"Job",
+		"Pod",
+		"StatefulSet",
+	}
+
+	if len(helmChartMirrorConfig.AdditionalImageResources) > 0 {
+		imageResources = slices.Concat(imageResources, helmChartMirrorConfig.AdditionalImageResources)
+	}
+
+	if len(repoConfig.AdditionalImageResources) > 0 {
+		imageResources = slices.Concat(imageResources, repoConfig.AdditionalImageResources)
+	}
+
+	if len(chartConfig.AdditionalImageResources) > 0 {
+		imageResources = slices.Concat(imageResources, chartConfig.AdditionalImageResources)
+	}
+
+	slices.Sort(imageResources)
+	imageResources = slices.Compact(imageResources)
+
 	// set yqlib logging to 'WARNING'
 	gologging.SetLevel(gologging.WARNING, "yq-lib")
 
@@ -45,7 +82,7 @@ func collectAllImages(outputManifest string) []string {
 	yqPrefs.PrintDocSeparators = false
 	yqDecoder := yqlib.NewYamlDecoder(yqPrefs)
 	yqEncoder := yqlib.NewYamlEncoder(yqPrefs)
-	yqFilter := `select(.kind == "Deployment" or .kind == "DeploymentConfig" or .kind == "StatefulSet" or .kind == "DaemonSet" or .kind == "CronJob" or .kind == "Job" or .kind == "Pod") | .. | select(has("image")) | .image`
+	yqFilter := `select(` + strings.Join(getQueryPredicate(imageResources), " or ") + `) | .. | select(has("image")) | .image`
 	allImages, err := yqlib.NewStringEvaluator().EvaluateAll(yqFilter, outputManifest, yqEncoder, yqDecoder)
 	if err != nil {
 		log.Fatalf("ERROR: unable to parse Helm templated output for images: %s\n", err)

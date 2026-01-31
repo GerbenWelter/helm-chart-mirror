@@ -29,11 +29,11 @@ func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 			log.Println("INFO: getting all images used by chart based on supplied template configurations")
 			var allChartImages []string
 			if len(chart.TemplateConfigurations) == 0 {
-				chartImages := extractChartImages(helmChartMirrorConfig, helmChart, make(map[string]any))
+				chartImages := extractChartImages(helmChartMirrorConfig, repo, chart, helmChart, make(map[string]any))
 				allChartImages = dedupImages(chartImages)
 			} else {
 				for _, tc := range chart.TemplateConfigurations {
-					chartImages := extractChartImages(helmChartMirrorConfig, helmChart, tc)
+					chartImages := extractChartImages(helmChartMirrorConfig, repo, chart, helmChart, tc)
 					allChartImages = append(allChartImages, chartImages...)
 				}
 				allChartImages = dedupImages(allChartImages)

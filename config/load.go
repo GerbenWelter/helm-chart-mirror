@@ -11,24 +11,27 @@ import (
 )
 
 type Chart struct {
-	Name                   string           `yaml:"name"`
-	Version                string           `yaml:"version"`
-	TemplateConfigurations []map[string]any `yaml:"templateConfigurations"`
+	Name                     string           `yaml:"name"`
+	Version                  string           `yaml:"version"`
+	TemplateConfigurations   []map[string]any `yaml:"templateConfigurations"`
+	AdditionalImageResources []string         `yaml:"additionalImageResources"`
 }
 
 type Repository struct {
-	Name   string  `yaml:"name"`
-	Source string  `yaml:"source"`
-	Charts []Chart `yaml:"charts"`
+	Name                     string   `yaml:"name"`
+	Source                   string   `yaml:"source"`
+	Charts                   []Chart  `yaml:"charts"`
+	AdditionalImageResources []string `yaml:"additionalImageResources"`
 }
 
 type Config struct {
-	KubernetesVersion     string       `yaml:"kubernetesVersion"`
-	Repositories          []Repository `yaml:"repositories"`
-	OverridePlatform      string       `yaml:"overridePlatform"`
-	DestinationRegistry   string       `yaml:"destinationRegistry"`
-	DestinationRepository string       `yaml:"destinationRepository"`
-	TmpDir                string       `yaml:"tmpDir"`
+	KubernetesVersion        string       `yaml:"kubernetesVersion"`
+	Repositories             []Repository `yaml:"repositories"`
+	OverridePlatform         string       `yaml:"overridePlatform"`
+	DestinationRegistry      string       `yaml:"destinationRegistry"`
+	DestinationRepository    string       `yaml:"destinationRepository"`
+	TmpDir                   string       `yaml:"tmpDir"`
+	AdditionalImageResources []string     `yaml:"additionalImageResources"`
 }
 
 var OCICredentials *credentials.DynamicStore

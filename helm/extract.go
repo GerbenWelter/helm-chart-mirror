@@ -14,7 +14,13 @@ import (
 	"k8s.io/client-go/discovery"
 )
 
-func extractChartImages(helmChartMirrorConfig config.Config, loadedChart *v2.Chart, tc map[string]any) []string {
+func extractChartImages(
+	helmChartMirrorConfig config.Config,
+	repoConfig config.Repository,
+	chartConfig config.Chart,
+	loadedChart *v2.Chart,
+	tc map[string]any,
+) []string {
 	actionConfig := new(action.Configuration)
 	install := action.NewInstall(actionConfig)
 	install.DryRunStrategy = "client"
@@ -61,5 +67,5 @@ func extractChartImages(helmChartMirrorConfig config.Config, loadedChart *v2.Cha
 		}
 	}
 
-	return collectAllImages(manifests + hookManifests.String())
+	return collectAllImages(manifests+hookManifests.String(), helmChartMirrorConfig, repoConfig, chartConfig)
 }
