@@ -45,7 +45,7 @@ func collectAllImages(outputManifest string) []string {
 	yqPrefs.PrintDocSeparators = false
 	yqDecoder := yqlib.NewYamlDecoder(yqPrefs)
 	yqEncoder := yqlib.NewYamlEncoder(yqPrefs)
-	yqFilter := `select(.kind == "Deployment" or .kind == "DeploymentConfig" or .kind == "StatefulSet" or .kind == "DaemonSet" or .kind == "CronJob" or .kind == "Job") | .. | select(has("image")) | .image`
+	yqFilter := `select(.kind == "Deployment" or .kind == "DeploymentConfig" or .kind == "StatefulSet" or .kind == "DaemonSet" or .kind == "CronJob" or .kind == "Job" or .kind == "Pod") | .. | select(has("image")) | .image`
 	allImages, err := yqlib.NewStringEvaluator().EvaluateAll(yqFilter, outputManifest, yqEncoder, yqDecoder)
 	if err != nil {
 		log.Fatalf("ERROR: unable to parse Helm templated output for images: %s\n", err)
