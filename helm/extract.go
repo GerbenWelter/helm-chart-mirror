@@ -2,6 +2,7 @@ package helm
 
 import (
 	"log"
+	"strings"
 
 	"helm-chart-mirror/client"
 	"helm-chart-mirror/config"
@@ -9,6 +10,7 @@ import (
 	"helm.sh/helm/v4/pkg/action"
 	v2 "helm.sh/helm/v4/pkg/chart/v2"
 	"helm.sh/helm/v4/pkg/release"
+	releaseutil "helm.sh/helm/v4/pkg/release/v1/util"
 	"k8s.io/client-go/discovery"
 )
 
@@ -44,10 +46,20 @@ func extractChartImages(helmChartMirrorConfig config.Config, loadedChart *v2.Cha
 	}
 	manifests := accessor.Manifest()
 
-	completeManifest := manifests
-
 	// also get manifests from helm chart hooks
-	completeManifest += accessor.Manifest()
+	var hookManifests strings.Builder
 
-	return collectAllImages(completeManifest)
+	for _, hook := range accessor.Hooks() {
+		hookAccessor, err := release.NewHookAccessor(hook)
+		if err != nil {
+			log.Fatalf("ERROR: unable to get hook accessor: %s\n", err)
+		}
+
+		hookAccessorManifests := releaseutil.SplitManifests(hookAccessor.Manifest())
+		for _, m := range hookAccessorManifests {
+			hookManifests.WriteString("\n---\n" + m)
+		}
+	}
+
+	return collectAllImages(manifests + hookManifests.String())
 }
