@@ -3,7 +3,7 @@ module helm-chart-mirror
 go 1.25.6
 
 require (
-	github.com/mikefarah/yq/v4 v4.50.1
+	github.com/mikefarah/yq/v4 v4.52.2
 	github.com/opencontainers/image-spec v1.1.1
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1

@@ -230,8 +230,8 @@ github.com/mattn/go-sqlite3 v1.14.22 h1:2gZY6PC6kBnID23Tichd1K+Z0oS6nE/XwU+Vz/5o
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/miekg/dns v1.1.57 h1:Jzi7ApEIzwEPLHWRcafCN9LZSBbqQpxjt/wpgvg7wcM=
 github.com/miekg/dns v1.1.57/go.mod h1:uqRjCRUuEAA6qsOiJvDd+CFo/vW+y5WR6SNmHE55hZk=
-github.com/mikefarah/yq/v4 v4.50.1 h1:u7pnei4FIv4HGL5ZBuNVDhDBe9et1YRFnoTmKZw6zOY=
-github.com/mikefarah/yq/v4 v4.50.1/go.mod h1:L4Z8NywrquZ+PVMz6IFFeGIp64eBC2mGC0nMryygCnI=
+github.com/mikefarah/yq/v4 v4.52.2 h1:g38MGUsWO4y6Te1tzZy3fk6hZ9xknRHLzBaXVoqfAyI=
+github.com/mikefarah/yq/v4 v4.52.2/go.mod h1:05ytoLM9RqcBCI73V3lqDL1gbQ29mEe573IslI9ibU8=
 github.com/mitchellh/copystructure v1.2.0 h1:vpKXTN4ewci03Vljg/q9QvCGUDttBOGBIa15WveJJGw=
 github.com/mitchellh/copystructure v1.2.0/go.mod h1:qLl+cE2AmVv+CoeAwDPye/v+N2HKCj9FbZEVFJRxO9s=
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
