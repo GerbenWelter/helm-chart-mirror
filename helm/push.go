@@ -2,6 +2,7 @@ package helm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"helm-chart-mirror/config"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"helm.sh/helm/v4/pkg/registry"
 	"oras.land/oras-go/v2/registry/remote"
 	"oras.land/oras-go/v2/registry/remote/auth"
+	"oras.land/oras-go/v2/registry/remote/errcode"
 	"oras.land/oras-go/v2/registry/remote/retry"
 )
 
@@ -60,7 +62,12 @@ func pushChartFileToRegistry(chartFile, repoName, chartName, chartVersion string
 		return nil
 	})
 	if err != nil {
-		log.Fatalf("ERROR: unable to list tags: %v", err)
+		var errResp *errcode.ErrorResponse
+		if errors.As(err, &errResp) && errResp.StatusCode == 404 {
+			log.Printf("INFO: unable to find Helm Chart repository: %s", repository)
+		} else {
+			log.Fatalf("ERROR: unable to list tags: %v", err)
+		}
 	}
 
 	if slices.Contains(existingTags, chartVersion) {
@@ -79,9 +86,7 @@ func pushChartFileToRegistry(chartFile, repoName, chartName, chartVersion string
 	}
 
 	log.Printf("INFO: pushing helm chart to '%s'\n", chartRef)
-	// Because of the above semver issue we must also disable Strict Mode when pushing.
-	strictMode := registry.PushOptStrictMode(false)
-	_, err = helmRegistryClient.Push(chartData, chartRef, strictMode)
+	_, err = helmRegistryClient.Push(chartData, chartRef)
 	if err != nil {
 		log.Printf("ERROR: unable to push chart to repository! (%s)", err)
 	}
