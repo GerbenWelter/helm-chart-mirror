@@ -22,26 +22,26 @@ destinationRegistry: myregistry.example.com:5043 # if no port is specified it wi
 destinationRepository: mirror # prefix used relative to the root of the registry
 kubernetesVersion: '1.33' # if not present will use kubernetes cluster version
 overridePlatform: linux/amd64 # if not present it will default to the platform used
-addtionalImageResource: # for custom resources that also have an image definition
+additionalImageResource: # for custom resources that also have an image definition
   - MyCustomResource # will be used for parsing all charts in this configuration
 repositories:
   - name: cert-manager # name for repository
     source: oci://ghcr.io/cert-manager/charts # Helm chart source is in a OCI-compliant registry
-    addtionalImageResource:
+    additionalImageResources:
       - MyCustomResource # will be used for parsing all charts in this repository
     charts:
       - name: openshift-routes # name of helm chart
         version: 0.8.4 # version of helm chart
-        addtionalImageResource:
+        additionalImageResources:
           - MyCustomResource # will be only be used for this chart
   - name: some-chart-repo
     source: oci://some-repo/charts # Helm chart source is in a OCI-compliant registry
-    addtionalImageResource:
+    additionalImageResources:
       - MyCustomResource # will be used for parsing all charts in repository 'some-chart-repo'
     charts:
       - name: chart-with-custom-resources # name of helm chart
         version: 1.2.3 # version of helm chart
-        addtionalImageResource:
+        additionalImageResources:
           - AnotherResource # will be only be used for this chart
   - name: grafana
     source: https://grafana.github.io/helm-charts # Helm chart in a classic style registry
