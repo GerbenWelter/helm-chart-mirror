@@ -26,9 +26,9 @@ func pushChartFileToRegistry(chartFile, repoName, chartName, chartVersion string
 	}
 
 	repository := fmt.Sprintf(
-		"%s/%s/charts/%s/%s",
+		"%s/%s/%s/%s",
 		helmChartMirrorConfig.DestinationRegistry,
-		helmChartMirrorConfig.DestinationRepository,
+		helmChartMirrorConfig.ChartDestinationRepository,
 		repoName,
 		chartName,
 	)
