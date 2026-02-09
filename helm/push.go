@@ -86,7 +86,9 @@ func pushChartFileToRegistry(chartFile, repoName, chartName, chartVersion string
 	}
 
 	log.Printf("INFO: pushing helm chart to '%s'\n", chartRef)
-	_, err = helmRegistryClient.Push(chartData, chartRef)
+	// Because of the above semver issue we must also disable Strict Mode when pushing.
+	strictMode := registry.PushOptStrictMode(false)
+	_, err = helmRegistryClient.Push(chartData, chartRef, strictMode)
 	if err != nil {
 		log.Printf("ERROR: unable to push chart to repository! (%s)", err)
 	}
