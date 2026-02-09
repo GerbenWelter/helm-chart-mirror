@@ -2,13 +2,18 @@ package config
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
 	"oras.land/oras-go/v2/registry/remote/credentials"
 )
+
+var repoPathRegex = regexp.MustCompile(`^[^/].*[^/]$`)
 
 type Chart struct {
 	Name                     string           `yaml:"name"`
@@ -25,22 +30,26 @@ type Repository struct {
 }
 
 type Config struct {
-	KubernetesVersion        string       `yaml:"kubernetesVersion"`
-	Repositories             []Repository `yaml:"repositories"`
-	OverridePlatform         string       `yaml:"overridePlatform"`
-	DestinationRegistry      string       `yaml:"destinationRegistry"`
-	DestinationRepository    string       `yaml:"destinationRepository"`
-	TmpDir                   string       `yaml:"tmpDir"`
-	AdditionalImageResources []string     `yaml:"additionalImageResources"`
+	KubernetesVersion            string       `yaml:"kubernetesVersion"`
+	Repositories                 []Repository `yaml:"repositories"`
+	OverridePlatform             string       `yaml:"overridePlatform"`
+	DestinationRegistry          string       `yaml:"destinationRegistry"`
+	ChartDestinationRepository   string       `yaml:"chartDestinationRepository"`
+	ImageDestinationRepository   string       `yaml:"imageDestinationRepository"`
+	IncludeOriginalImageRegistry bool         `yaml:"includeOriginalImageRegistry"`
+	TmpDir                       string       `yaml:"tmpDir"`
+	AdditionalImageResources     []string     `yaml:"additionalImageResources"`
 }
 
 var OCICredentials *credentials.DynamicStore
 
 func LoadConfig() Config {
 	config := Config{
-		DestinationRegistry:   "",
-		DestinationRepository: "",
-		TmpDir:                "/tmp",
+		DestinationRegistry:          "",
+		ChartDestinationRepository:   "",
+		ImageDestinationRepository:   "",
+		IncludeOriginalImageRegistry: true,
+		TmpDir:                       "/tmp",
 	}
 
 	configFilePath := "/etc/helm-chart-mirror/config.yaml"
@@ -60,11 +69,59 @@ func LoadConfig() Config {
 		log.Fatalf("ERROR: unable to parse config (%s)", err)
 	}
 
-	if config.DestinationRegistry == "" || config.DestinationRepository == "" {
-		log.Fatalln("ERROR: mirror registry and mirror repository need to be configured!")
+	err = ValidateAndDefaultConfig(&config)
+	if err != nil {
+		log.Fatalf("%s", err.Error())
 	}
 
 	return config
+}
+
+func validateRepoPath(name, value string) error {
+	value = strings.TrimSpace(value)
+
+	if value == "" {
+		return fmt.Errorf("%s must not be empty", name)
+	}
+
+	if !repoPathRegex.MatchString(value) {
+		return fmt.Errorf(
+			"%s must not start or end with '/' (got %q)",
+			name, value,
+		)
+	}
+
+	return nil
+}
+
+func ValidateAndDefaultConfig(config *Config) error {
+	if config.DestinationRegistry == "" {
+		return fmt.Errorf("mirror registry needs to be configured!")
+	}
+
+	// Defaulting
+	if config.ChartDestinationRepository == "" {
+		config.ChartDestinationRepository = "charts"
+	} else {
+		if err := validateRepoPath(
+			"chartDestinationRepository",
+			config.ChartDestinationRepository,
+		); err != nil {
+			return err
+		}
+	}
+
+	// Optional field
+	if config.ImageDestinationRepository != "" {
+		if err := validateRepoPath(
+			"imageDestinationRepository",
+			config.ImageDestinationRepository,
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func LoadOCICredentials() {

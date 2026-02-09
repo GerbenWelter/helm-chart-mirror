@@ -49,6 +49,8 @@ func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 }
 
 func SyncImage(image string, helmChartMirrorConfig config.Config) {
+	log.Printf("DEBUG: started processing  '%s'", image)
+
 	s := strings.SplitN(image, ":", 2)
 	img := s[0]
 	tagDigest := s[1]
@@ -60,8 +62,6 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 	sourceRegistry := r[0]
 	sourceRepository := r[1]
 	destinationRepository := sourceRepository
-
-	log.Printf("INFO: syncing '%s/%s:%s' to '%s/%s/%s/%s:%s'", sourceRegistry, sourceRepository, tagDigest, helmChartMirrorConfig.DestinationRegistry, helmChartMirrorConfig.DestinationRepository, sourceRegistry, destinationRepository, tag)
 
 	// oras.Copy() doesn't know how to handle library images like docker.io/memcached
 	if !strings.Contains(sourceRepository, "/") {
@@ -104,25 +104,34 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 		}),
 	}
 
-	dest, err := destReg.Repository(context.Background(), fmt.Sprintf("%s/%s/%s", helmChartMirrorConfig.DestinationRepository, sourceRegistry, destinationRepository))
-	if err != nil {
-		log.Fatalf("ERROR: unable to execute Repository() for destination repository '%s'", sourceRepository)
+	parts := []string{}
+	if helmChartMirrorConfig.ImageDestinationRepository != "" {
+		parts = append(parts, helmChartMirrorConfig.ImageDestinationRepository)
 	}
+	if helmChartMirrorConfig.IncludeOriginalImageRegistry {
+		parts = append(parts, sourceRegistry)
+	}
+	parts = append(parts, destinationRepository)
+	dest := strings.Join(parts, "/")
 
-	// Check if image already exists in the destination repository
-	destRepoURL := fmt.Sprintf("%s/%s/%s/%s", helmChartMirrorConfig.DestinationRegistry, helmChartMirrorConfig.DestinationRepository, sourceRegistry, destinationRepository)
-	repo, err := remote.NewRepository(destRepoURL)
+	destinationRepositoryUrl := fmt.Sprintf("%s/%s", helmChartMirrorConfig.DestinationRegistry, dest)
+
+	repo, err := remote.NewRepository(destinationRepositoryUrl)
+	if err != nil {
+		log.Fatalf("ERROR: unable setup connection to '%s'", destinationRepositoryUrl)
+	}
 	repo.Client = &auth.Client{
 		Credential: auth.StaticCredential(helmChartMirrorConfig.DestinationRegistry, auth.Credential{
 			Username: destRegistryCreds.Username,
 			Password: destRegistryCreds.Password,
 		}),
 	}
-	if err != nil {
-		log.Fatalf("ERROR: unable setup connection to '%s'", destRepoURL)
-	}
 
-	reference := fmt.Sprintf("%s:%s", destRepoURL, tag)
+	reference := fmt.Sprintf("%s:%s", destinationRepositoryUrl, tag)
+	destRepo, err := destReg.Repository(context.Background(), dest)
+	if err != nil {
+		log.Fatalf("ERROR: unable to execute Repository() for destination repository '%s'", dest)
+	}
 
 	_, err = repo.Resolve(context.Background(), reference)
 	if err != nil {
@@ -143,9 +152,11 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 			})
 		}
 
-		_, err = oras.Copy(context.Background(), source, tagDigest, dest, tag, copyOptions)
+		_, err = oras.Copy(context.Background(), source, tagDigest, destRepo, tag, copyOptions)
 		if err != nil {
-			log.Printf("ERROR: unable to copy image from '%s/%s:%s' to '%s/%s/%s:%s' (%s)", sourceRegistry, sourceRepository, tagDigest, helmChartMirrorConfig.DestinationRegistry, helmChartMirrorConfig.DestinationRepository, destinationRepository, tag, err)
+			log.Printf("ERROR: unable to copy image from '%s/%s:%s' to '%s' (%s)", sourceRegistry, sourceRepository, tagDigest, reference, err)
+		} else {
+			log.Printf("INFO: succesfully copied image from '%s/%s:%s' to '%s'", sourceRegistry, sourceRepository, tagDigest, reference)
 		}
 	} else {
 		log.Printf("INFO: skipping, image '%s' already exists", reference)
