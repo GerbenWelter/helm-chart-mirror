@@ -118,14 +118,14 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 
 	// Check if image already exists in the destination repository
 	repo, err := remote.NewRepository(destinationRepositoryUrl)
+	if err != nil {
+		log.Fatalf("ERROR: unable setup connection to '%s'", destinationRepositoryUrl)
+	}
 	repo.Client = &auth.Client{
 		Credential: auth.StaticCredential(helmChartMirrorConfig.DestinationRegistry, auth.Credential{
 			Username: destRegistryCreds.Username,
 			Password: destRegistryCreds.Password,
 		}),
-	}
-	if err != nil {
-		log.Fatalf("ERROR: unable setup connection to '%s'", destinationRepositoryUrl)
 	}
 
 	reference := fmt.Sprintf("%s:%s", destinationRepositoryUrl, tag)
