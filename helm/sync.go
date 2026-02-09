@@ -104,12 +104,15 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 		}),
 	}
 
-	var dest string
-	if helmChartMirrorConfig.IncludeOriginalImageRegistry == true {
-		dest = fmt.Sprintf("%s/%s/%s", helmChartMirrorConfig.ImageDestinationRepository, sourceRegistry, destinationRepository)
-	} else {
-		dest = fmt.Sprintf("%s/%s", helmChartMirrorConfig.ImageDestinationRepository, destinationRepository)
+	parts := []string{}
+	if helmChartMirrorConfig.ImageDestinationRepository != "" {
+		parts = append(parts, helmChartMirrorConfig.ImageDestinationRepository)
 	}
+	if helmChartMirrorConfig.IncludeOriginalImageRegistry {
+		parts = append(parts, sourceRegistry)
+	}
+	parts = append(parts, destinationRepository)
+	dest := strings.Join(parts, "/")
 
 	destinationRepositoryUrl := fmt.Sprintf("%s/%s", helmChartMirrorConfig.DestinationRegistry, dest)
 
