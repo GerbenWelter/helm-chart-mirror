@@ -63,8 +63,9 @@ func SyncImage(image string, helmChartMirrorConfig config.Config) {
 	sourceRepository := r[1]
 	destinationRepository := sourceRepository
 
-	// oras.Copy() doesn't know how to handle library images like docker.io/memcached
-	if !strings.Contains(sourceRepository, "/") {
+	// Oras fails to pull 'library' images on docker.io which omit the library part
+	// e.g. docker.io/busybox. Tools like podman have similar workarounds.
+	if strings.Contains(sourceRegistry, "docker.io") && !strings.Contains(sourceRepository, "/") {
 		sourceRepository = "library/" + sourceRepository
 	}
 
