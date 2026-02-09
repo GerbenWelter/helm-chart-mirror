@@ -22,7 +22,6 @@ func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 		for _, chart := range repo.Charts {
 			helmChart, chartFile, err := loadHelmChart(repo, chart, helmChartMirrorConfig.TmpDir)
 			if err != nil {
-				log.Printf("ERROR: unable to load Helm chart '%s/%s', skipping!\n", repo.Name, chart.Name)
 				continue
 			}
 

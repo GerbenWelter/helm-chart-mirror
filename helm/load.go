@@ -12,6 +12,7 @@ func loadHelmChart(repo config.Repository, chartDefinition config.Chart, tmpdir 
 	chartFile, err := pullHelmChartFile(repo.Source, chartDefinition.Name, chartDefinition.Version, tmpdir)
 	if err != nil {
 		log.Printf("ERROR: unable to load Helm Chart '%s' (%s)", chartDefinition.Name, err)
+		return nil, "", err
 	}
 
 	log.Printf("INFO: loading helm chart for: %s\n", chartDefinition.Name)
