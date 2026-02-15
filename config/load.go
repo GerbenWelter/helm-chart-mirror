@@ -20,6 +20,7 @@ type Chart struct {
 	Version                  string           `yaml:"version"`
 	TemplateConfigurations   []map[string]any `yaml:"templateConfigurations"`
 	AdditionalImageResources []string         `yaml:"additionalImageResources"`
+	Platforms                []string         `yaml:"platforms"`
 }
 
 type Repository struct {
@@ -33,6 +34,7 @@ type Config struct {
 	KubernetesVersion            string       `yaml:"kubernetesVersion"`
 	Repositories                 []Repository `yaml:"repositories"`
 	OverridePlatform             string       `yaml:"overridePlatform"`
+	AllPlatforms                 bool         `yaml:"allPlatforms"`
 	DestinationRegistry          string       `yaml:"destinationRegistry"`
 	ChartDestinationRepository   string       `yaml:"chartDestinationRepository"`
 	ImageDestinationRepository   string       `yaml:"imageDestinationRepository"`
@@ -97,6 +99,10 @@ func validateRepoPath(name, value string) error {
 func ValidateAndDefaultConfig(config *Config) error {
 	if config.DestinationRegistry == "" {
 		return fmt.Errorf("mirror registry needs to be configured!")
+	}
+
+	if config.AllPlatforms && config.OverridePlatform != "" {
+		return fmt.Errorf("overridePlatform and allPlatforms are mutually exclusive!")
 	}
 
 	// Defaulting

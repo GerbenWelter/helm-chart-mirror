@@ -10,6 +10,7 @@ Helm-chart-mirror has the following features:
 
 - Can pull charts from classic Helm or OCI-compliant registries.
 - Mirror container images used by Helm chart.
+- Mirror all platforms or a subset for images used by a chart.
 - Supports multiple sets of values for configurations that might otherwise conflict or additional container images.
 - Supports authentication to OCI-compliant registries.
 
@@ -21,8 +22,9 @@ When compiled to a single binary `helm-chart-mirror` can be used in scripting or
 destinationRegistry: myregistry.example.com:5043 # if no port is specified it will default to 443
 imageDestinationRepository: mirror # prefix used relative to the root of the registry
 chartDestinationRepository: syncedCharts # prefix used relative to the root of the registry, if omitted: 'charts' is used
-kubernetesVersion: "1.33" # if not present will use kubernetes cluster version
+kubernetesVersion: '1.33' # if not present will use kubernetes cluster version
 overridePlatform: linux/amd64 # if not present it will default to the platform used
+allPlatforms: false # Set to true to mirror every platform the source image contains; Mutually exclusive with overridePlatform
 additionalImageResource: # for custom resources that also have an image definition
   - MyCustomResource # will be used for parsing all charts in this configuration
 repositories:
@@ -44,6 +46,9 @@ repositories:
         version: 1.2.3 # version of helm chart
         additionalImageResources:
           - AnotherResource # will be only be used for this chart
+        platforms: # If multiple platforms are needed
+          - linux/amd64
+          - windows/amd64
   - name: grafana
     source: https://grafana.github.io/helm-charts # Helm chart in a classic style registry
     charts:
