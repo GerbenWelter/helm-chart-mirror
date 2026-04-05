@@ -42,7 +42,9 @@ func MirrorHelmCharts(helmChartMirrorConfig config.Config) {
 				SyncImage(image, helmChartMirrorConfig)
 			}
 
-			pushChartFileToRegistry(chartFile, repo.Name, chart.Name, chart.Version, helmChartMirrorConfig)
+			if !chart.ImagesOnly {
+				pushChartFileToRegistry(chartFile, repo.Name, chart.Name, chart.Version, helmChartMirrorConfig)
+			}
 		}
 	}
 }

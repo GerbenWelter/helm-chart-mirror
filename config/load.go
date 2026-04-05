@@ -20,6 +20,7 @@ type Chart struct {
 	Version                  string           `yaml:"version"`
 	TemplateConfigurations   []map[string]any `yaml:"templateConfigurations"`
 	AdditionalImageResources []string         `yaml:"additionalImageResources"`
+	ImagesOnly               bool             `yaml:"imagesOnly"`
 }
 
 type Repository struct {

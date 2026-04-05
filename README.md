@@ -21,7 +21,7 @@ When compiled to a single binary `helm-chart-mirror` can be used in scripting or
 destinationRegistry: myregistry.example.com:5043 # if no port is specified it will default to 443
 imageDestinationRepository: mirror # prefix used relative to the root of the registry
 chartDestinationRepository: syncedCharts # prefix used relative to the root of the registry, if omitted: 'charts' is used
-kubernetesVersion: "1.33" # if not present will use kubernetes cluster version
+kubernetesVersion: '1.33' # if not present will use kubernetes cluster version
 overridePlatform: linux/amd64 # if not present it will default to the platform used
 additionalImageResource: # for custom resources that also have an image definition
   - MyCustomResource # will be used for parsing all charts in this configuration
@@ -44,6 +44,7 @@ repositories:
         version: 1.2.3 # version of helm chart
         additionalImageResources:
           - AnotherResource # will be only be used for this chart
+        imagesOnly: true # do not mirror chart, images only
   - name: grafana
     source: https://grafana.github.io/helm-charts # Helm chart in a classic style registry
     charts:
