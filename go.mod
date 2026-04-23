@@ -7,7 +7,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1
 	gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473
 	gopkg.in/yaml.v3 v3.0.1
-  helm.sh/helm/v4 v4.1.4
+	helm.sh/helm/v4 v4.1.4
 	k8s.io/client-go v0.35.4
 	oras.land/oras-go/v2 v2.6.0
 )
