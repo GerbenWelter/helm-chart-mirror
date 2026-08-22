@@ -1,6 +1,6 @@
 module helm-chart-mirror
 
-go 1.26.4
+go 1.27.0
 
 require (
 	github.com/mikefarah/yq/v4 v4.53.3
